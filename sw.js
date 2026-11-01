@@ -1,5 +1,5 @@
 // LeseRegal – Service Worker: macht die App offline nutzbar.
-const APP_CACHE = "leseregal-app-v1";
+const APP_CACHE = "leseregal-app-v2";
 const COVER_CACHE = "leseregal-covers";
 const APP_FILES = [
   "./",
@@ -30,7 +30,7 @@ self.addEventListener("fetch", event => {
   const url = new URL(request.url);
 
   // Cover-Bilder: einmal laden, danach aus dem Speicher
-  if (url.hostname === "covers.openlibrary.org") {
+  if (url.hostname === "covers.openlibrary.org" || url.hostname === "books.google.com") {
     event.respondWith(
       caches.open(COVER_CACHE).then(async cache => {
         const hit = await cache.match(request);

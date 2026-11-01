@@ -7,29 +7,20 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="LeseRegal">
-<meta name="theme-color" content="#f6f1e8" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#15120f" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#ffffff">
+<meta name="color-scheme" content="light only">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="icon-192.png">
 <title>LeseRegal</title>
 <style>
 :root{
-  --bg:#f6f1e8; --card:#fffdf9; --text:#1f1a16; --muted:#7c7168; --line:rgba(60,40,20,.12);
+  --bg:#ffffff; --card:#ffffff; --text:#1c1c1e; --muted:#6e6e73; --line:rgba(0,0,0,.1);
   --green:#2e7d4f; --blue:#2f6bd0; --star:#e0a526;
-  --wall:#eee3d1; --wood1:#9a643c; --wood2:#6a4223;
-  --tabbg:rgba(250,246,239,.88); --seg:#e9e1d4; --segon:#fffdf9;
-  --shadow:0 1px 2px rgba(60,40,20,.08),0 4px 14px rgba(60,40,20,.06);
+  --tabbg:rgba(255,255,255,.9); --seg:#f0f0f2; --segon:#ffffff;
+  --shadow:0 1px 2px rgba(0,0,0,.05),0 4px 14px rgba(0,0,0,.05);
   --serif:"New York",ui-serif,Georgia,"Times New Roman",serif;
-  color-scheme:light dark;
-}
-@media (prefers-color-scheme: dark){
-  :root{
-    --bg:#15120f; --card:#211c18; --text:#f3ede5; --muted:#a59a8f; --line:rgba(255,240,220,.11);
-    --green:#4fb07a; --blue:#6c9cf0;
-    --wall:#1e1915; --wood1:#7a4f2e; --wood2:#4d311a;
-    --tabbg:rgba(30,25,21,.88); --seg:#2c2621; --segon:#453c34; --shadow:none;
-  }
+  color-scheme:light only;
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
@@ -101,16 +92,34 @@ h2{font-size:17px;margin:0 0 6px}
 .shelf-head{text-align:center;margin:0 0 14px}
 .shelf-head .count{font:700 36px/1.1 var(--serif)}
 .shelf-head p{color:var(--muted);margin:6px 12px 0;font-size:15px}
-.wall{background:var(--wall);border:1px solid var(--line);border-radius:18px;padding:2px 8px 22px}
-.shelf{padding-top:16px}
-.shelf-books{display:flex;align-items:flex-end;gap:3px;height:150px;padding:0 6px}
-.board{height:14px;border-radius:2px;background:linear-gradient(var(--wood1),var(--wood2));box-shadow:0 7px 8px -5px rgba(0,0,0,.45)}
-.spine{position:relative;flex:none;display:flex;align-items:center;justify-content:center;border-radius:3px;overflow:hidden;box-shadow:1px 0 1px rgba(0,0,0,.28)}
-.spine::before,.spine::after{content:"";position:absolute;left:0;right:0;height:2px;background:rgba(255,255,255,.35)}
-.spine::before{top:10px}
-.spine::after{bottom:10px}
-.spine span{writing-mode:vertical-rl;transform:rotate(180deg);font:600 10px/1 var(--serif);color:rgba(255,255,255,.95);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-height:calc(100% - 30px)}
-.spine.new{animation:drop .7s cubic-bezier(.2,.9,.3,1.25) both}
+.shelf-mode{max-width:280px;margin:0 auto 16px}
+/* Dunkles Holzregal: Rahmen außen, dunkle Rückwand, Holzbretter */
+.wall{padding:10px 8px 8px;border-radius:8px;background:linear-gradient(90deg,#4a2f1d,#62402a 18%,#57381f 50%,#62402a 82%,#4a2f1d);box-shadow:0 6px 18px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,220,180,.18)}
+.shelf{padding:18px 8px 0;background:repeating-linear-gradient(90deg,rgba(255,255,255,.018) 0 3px,transparent 3px 11px),linear-gradient(#1a130f,#271c15 45%,#20170f);box-shadow:inset 0 10px 14px -8px rgba(0,0,0,.75),inset 6px 0 10px -6px rgba(0,0,0,.6),inset -6px 0 10px -6px rgba(0,0,0,.6)}
+.shelf-books{display:flex;align-items:flex-end;gap:3px;height:164px;padding:0 6px}
+.board{position:relative;height:14px;margin:0 -8px;background:linear-gradient(#9a643c,#7a4c2c 45%,#5e3a20);box-shadow:0 7px 8px -4px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,215,170,.35)}
+.shelf:last-child .board{margin-bottom:0}
+.plant{flex:none;align-self:flex-end;pointer-events:none}
+.plant.right{margin-left:auto}
+.plant svg{display:block}
+/* Buchrücken */
+.spine{position:relative;flex:none;border-radius:2px 2px 1px 1px;overflow:hidden;box-shadow:1px 0 1px rgba(0,0,0,.3),inset 0 0 0 .5px rgba(0,0,0,.25)}
+/* Farbe und Struktur vom linken Rand des echten Covers – der liegt beim echten Buch direkt neben dem Rücken */
+.spine .tex{position:absolute;inset:-6px;background-size:700% 115%;background-position:4% 50%;filter:blur(2.5px) saturate(1.15)}
+.spine .shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.34),rgba(255,255,255,.16) 32%,rgba(255,255,255,.04) 55%,rgba(0,0,0,.36)),rgba(0,0,0,.14)}
+.spine .band{position:absolute;left:0;right:0;height:2px;background:rgba(255,255,255,.42)}
+.spine .t,.spine .a{position:absolute;left:0;right:0;display:flex;align-items:center;justify-content:center}
+.spine .t span,.spine .a span{writing-mode:vertical-rl;transform:rotate(180deg);overflow:hidden;max-height:100%;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.7);text-align:center}
+.spine .t span{font-family:var(--serif);font-weight:700;line-height:1.05;letter-spacing:.01em;white-space:nowrap;text-overflow:ellipsis}
+.spine .t.two span{white-space:normal;max-width:2.25em}
+.spine .a span{font:600 7px/1 -apple-system,system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;text-overflow:ellipsis;opacity:.92}
+/* Cover nach vorne */
+.face{position:relative;flex:none;width:62px;height:93px;border-radius:2px 4px 4px 2px;overflow:hidden;background:linear-gradient(135deg,var(--c),color-mix(in srgb,var(--c) 72%,#000));box-shadow:2px 3px 6px rgba(0,0,0,.28),inset 3px 0 0 rgba(0,0,0,.12)}
+.face .ph b{font-size:8px}
+.face .ph i{display:none}
+.face img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .35s}
+.face img.loaded{opacity:1}
+.spine.new,.face.new{animation:drop .7s cubic-bezier(.2,.9,.3,1.25) both}
 @keyframes drop{from{transform:translateY(-60px);opacity:0}to{transform:none;opacity:1}}
 
 /* Backup */
@@ -184,7 +193,7 @@ textarea{display:block;width:100%;min-height:120px;padding:12px;border-radius:12
     <input class="search" id="search" type="search" placeholder="Titel oder Autor*in suchen" aria-label="Suchen" autocomplete="off" enterkeyhint="search">
     <ul class="list" id="bookList"></ul>
     <p class="empty" id="emptyList" hidden>Keine Bücher in dieser Ansicht.</p>
-    <p class="credit">Liste: Leser*innen-Wahl der New York Times, deutsche Titel nach egoFM. Cover: Open Library.</p>
+    <p class="credit">Liste: Leser*innen-Wahl der New York Times, deutsche Titel nach egoFM. Cover: Open Library und Google Books.</p>
   </section>
 
   <!-- REGAL -->
@@ -193,6 +202,10 @@ textarea{display:block;width:100%;min-height:120px;padding:12px;border-radius:12
     <div class="shelf-head">
       <div class="count" id="shelfCount">0 / 100</div>
       <p id="shelfSub"></p>
+    </div>
+    <div class="segmented shelf-mode" role="group" aria-label="Ansicht">
+      <button type="button" data-mode="spine" aria-pressed="true" class="on">Buchrücken</button>
+      <button type="button" data-mode="cover" aria-pressed="false">Cover</button>
     </div>
     <div class="wall" id="shelves"></div>
   </section>
@@ -264,7 +277,7 @@ const STATUSES = [
   { id: "finished", short: "Gelesen",  label: "Gelesen" },
 ];
 const STORE_KEY = "leseregal.v1";
-const COVER_KEY = "leseregal.covers.v1";
+const COVER_KEY = "leseregal.covers.v2";
 const $ = s => document.querySelector(s);
 
 /* ---------- Speichern ---------- */
@@ -332,7 +345,7 @@ function placeholder(b) {
   return `<span class="ph"><b>${esc(b.de)}</b><i>${esc(b.author)}</i></span>`;
 }
 function coverHTML(b, size) {
-  return `<span class="cover ${size === "L" ? "l" : "s"}" data-rank="${b.rank}" data-size="${size}" style="--c:${color(b.rank)}" aria-hidden="true">${placeholder(b)}</span>`;
+  return `<span class="cover ${size === "L" ? "l" : "s"}" data-cover="${b.rank}" data-size="${size}" style="--c:${color(b.rank)}" aria-hidden="true">${placeholder(b)}</span>`;
 }
 
 let toastTimer = null;
@@ -345,31 +358,52 @@ function toast(text, warn = false) {
   toastTimer = setTimeout(() => t.classList.remove("show"), 2200);
 }
 
-/* ---------- Cover (Open Library) ---------- */
+/* ---------- Cover (Open Library, Ersatz: Google Books) ---------- */
 const coverQueue = [], pending = new Set(), failedAt = {};
 let activeLookups = 0;
-const RETRY_MS = 5 * 60 * 1000;
+const RETRY_MS = 5 * 60 * 1000;          // nach Netzfehler
+const NONE_RETRY_MS = 7 * 86400000;      // „kein Cover gefunden“ nach 7 Tagen erneut versuchen
 
-function insertImg(el, id) {
+function coverInfo(rank) {
+  const c = coverCache[rank];
+  return c && typeof c === "object" ? c : null;
+}
+function coverUrl(rank, size = "M") {
+  const c = coverInfo(rank);
+  if (c && c.ol) return `https://covers.openlibrary.org/b/id/${c.ol}-${size}.jpg?default=false`;
+  if (c && c.gb) return c.gb;
+  return null;
+}
+function needsLookup(rank) {
+  const c = coverInfo(rank);
+  if (!c) return true;
+  return !!c.none && Date.now() - c.none > NONE_RETRY_MS;
+}
+function insertImg(el, url) {
   if (el.querySelector("img")) return;
   const img = new Image();
   img.alt = "";
   img.decoding = "async";
   img.loading = "lazy";
-  img.onload = () => img.classList.add("loaded");
+  img.onload = () => {
+    // Google liefert manchmal ein winziges Platzhalterbild – das ignorieren
+    if (img.naturalWidth < 20) { img.remove(); return; }
+    img.classList.add("loaded");
+  };
   img.onerror = () => img.remove();
-  img.src = `https://covers.openlibrary.org/b/id/${id}-${el.dataset.size || "M"}.jpg?default=false`;
+  img.src = url;
   el.appendChild(img);
 }
 function hydrateCovers(root) {
-  root.querySelectorAll(".cover[data-rank]").forEach(el => {
-    const rank = +el.dataset.rank;
-    if (typeof coverCache[rank] === "number") insertImg(el, coverCache[rank]);
-    else if (!(rank in coverCache)) requestCover(rank);
+  root.querySelectorAll("[data-cover]").forEach(el => {
+    const rank = +el.dataset.cover;
+    const url = coverUrl(rank, el.dataset.size || "M");
+    if (url) insertImg(el, url);
+    else if (needsLookup(rank)) requestCover(rank);
   });
 }
 function requestCover(rank) {
-  if (rank in coverCache || pending.has(rank)) return;
+  if (!needsLookup(rank) || pending.has(rank)) return;
   if (navigator.onLine === false) return;
   if (failedAt[rank] && Date.now() - failedAt[rank] < RETRY_MS) return;
   pending.add(rank);
@@ -383,18 +417,58 @@ function pump() {
     lookupCover(rank).finally(() => { activeLookups--; pending.delete(rank); pump(); });
   }
 }
+async function getJSON(url) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("HTTP " + res.status);
+  return res.json();
+}
+async function fromOpenLibrary(params) {
+  const q = new URLSearchParams({ ...params, fields: "cover_i,number_of_pages_median", limit: "10" });
+  const data = await getJSON(`https://openlibrary.org/search.json?${q}`);
+  const docs = data.docs || [];
+  const withCover = docs.find(d => d.cover_i);
+  if (!withCover) return null;
+  const withPages = docs.find(d => d.number_of_pages_median);
+  return { ol: withCover.cover_i, pages: withPages ? withPages.number_of_pages_median : null };
+}
+async function fromGoogle(q) {
+  const params = new URLSearchParams({ q, maxResults: "10", printType: "books" });
+  const data = await getJSON(`https://www.googleapis.com/books/v1/volumes?${params}`);
+  for (const item of data.items || []) {
+    const v = item.volumeInfo || {};
+    const link = v.imageLinks && (v.imageLinks.thumbnail || v.imageLinks.smallThumbnail);
+    if (link) return { gb: link.replace(/^http:/, "https:").replace("&edge=curl", ""), pages: v.pageCount || null };
+  }
+  return null;
+}
 async function lookupCover(rank) {
   const b = byRank[rank];
-  const params = new URLSearchParams({ title: b.en, author: b.author, fields: "cover_i", limit: "5" });
-  try {
-    const res = await fetch(`https://openlibrary.org/search.json?${params}`);
-    if (!res.ok) { failedAt[rank] = Date.now(); return; }
-    const data = await res.json();
-    const id = (data.docs || []).map(d => d.cover_i).find(Boolean) ?? null;
-    coverCache[rank] = id;
+  const last = b.author.split(" ").pop();
+  const attempts = [
+    () => fromOpenLibrary({ title: b.en, author: b.author }),
+    () => fromOpenLibrary({ q: `${b.en} ${last}` }),
+    () => fromGoogle(`intitle:${b.en} inauthor:${last}`),
+    () => fromGoogle(`intitle:${b.de} inauthor:${last}`),
+  ];
+  let allAnswered = true;
+  for (const attempt of attempts) {
+    try {
+      const found = await attempt();
+      if (found) {
+        coverCache[rank] = found;
+        writeJSON(COVER_KEY, coverCache);
+        document.querySelectorAll(`[data-cover="${rank}"]`).forEach(el => insertImg(el, coverUrl(rank, el.dataset.size || "M")));
+        scheduleShelf();
+        return;
+      }
+    } catch { allAnswered = false; }
+  }
+  if (allAnswered) {
+    coverCache[rank] = { none: Date.now() };
     writeJSON(COVER_KEY, coverCache);
-    if (id) document.querySelectorAll(`.cover[data-rank="${rank}"]`).forEach(el => insertImg(el, id));
-  } catch { failedAt[rank] = Date.now(); /* offline – später erneut versuchen */ }
+  } else {
+    failedAt[rank] = Date.now(); // Netzproblem – später erneut versuchen
+  }
 }
 
 /* ---------- Liste ---------- */
@@ -440,13 +514,77 @@ function renderList() {
 }
 
 /* ---------- Regal ---------- */
+const SNAKE_PLANT = `<svg width="54" height="118" viewBox="0 0 54 118" aria-hidden="true">
+  <path d="M21 84C14 75 8 64 3 50c10 9 17 20 22 34z" fill="#5f9e52"/>
+  <path d="M33 84c7-9 13-18 18-30-3 14-9 24-14 30z" fill="#4c8c44"/>
+  <path d="M24 84C16 66 10 44 12 18c9 22 14 42 16 66z" fill="#4a8a43"/>
+  <path d="M31 84c6-20 12-38 14-60 4 22-2 42-10 60z" fill="#3b7537"/>
+  <path d="M26 84c-3-22-4-46 1-80 6 32 6 56 3 80z" fill="#356d32"/>
+  <path d="M27 14l.6 62M14 30l8 46M43 34l-8 42" stroke="#a9cf8f" stroke-width=".9" opacity=".55" fill="none"/>
+  <path d="M27 6c1.5 8 2 14 2 20M12 18c2 6 4 10 5 14" stroke="#d6c76a" stroke-width="1" opacity=".7" fill="none"/>
+  <path d="M10 86h34l-4 31H14z" fill="#c8784e"/>
+  <path d="M14 117h26l.6-4H13.4z" fill="#a9603b"/>
+  <rect x="8" y="81" width="38" height="8" rx="2" fill="#d98b5f"/>
+  <rect x="8" y="81" width="38" height="2.5" rx="1.2" fill="#e8a37a"/>
+</svg>`;
+const PILEA = `<svg width="66" height="98" viewBox="0 0 66 98" aria-hidden="true">
+  <g stroke="#6f9441" stroke-width="1.4" fill="none" stroke-linecap="round">
+    <path d="M33 66C30 50 22 40 15 30"/><path d="M33 66c0-18-2-34-2-48"/><path d="M33 66c4-16 10-28 17-38"/>
+    <path d="M33 66C26 60 18 56 10 52"/><path d="M33 66c8-6 15-12 23-18"/><path d="M33 66c-3-8-6-16-9-24"/><path d="M33 66c3-8 6-15 9-22"/>
+  </g>
+  <circle cx="15" cy="28" r="9.5" fill="#5aa04a"/><circle cx="31" cy="15" r="10.5" fill="#4a9140"/>
+  <circle cx="50" cy="26" r="9.5" fill="#62aa50"/><circle cx="10" cy="51" r="7.5" fill="#6bb257"/>
+  <circle cx="56" cy="47" r="8" fill="#55994a"/><circle cx="23" cy="41" r="8" fill="#6db35a"/>
+  <circle cx="42" cy="43" r="8.5" fill="#4f9645"/>
+  <g fill="#9fd08a" opacity=".8"><circle cx="15" cy="28" r="1.4"/><circle cx="31" cy="15" r="1.5"/><circle cx="50" cy="26" r="1.4"/><circle cx="23" cy="41" r="1.2"/><circle cx="42" cy="43" r="1.2"/><circle cx="10" cy="51" r="1.1"/><circle cx="56" cy="47" r="1.2"/></g>
+  <path d="M15 64h36l-4 33H19z" fill="#fbfbfb" stroke="#d6d6d6"/>
+  <path d="M16.5 72h33" stroke="#e3e3e3" stroke-width="2"/>
+</svg>`;
+// Auf welchen Brettern Pflanzen stehen (Index ab 0) und wie viel Platz sie brauchen
+const PLANTS = {
+  0: { side: "right", svg: SNAKE_PLANT, w: 54 },
+  2: { side: "left", svg: PILEA, w: 66 },
+};
+const GAP = 3;
+let shelfMode = readJSON("leseregal.shelfmode", "spine") === "cover" ? "cover" : "spine";
+
+function spineSize(b) {
+  const c = coverInfo(b.rank);
+  const pages = c && c.pages;
+  const w = pages ? Math.round(Math.min(48, Math.max(18, 12 + pages / 20))) : 24 + (b.rank * 7) % 11;
+  const h = 128 + (b.rank * 13) % 30;
+  return { w, h };
+}
 function spineHTML(b, animate) {
-  const w = 24 + (b.rank * 7) % 11;
-  const h = 112 + (b.rank * 13) % 30;
+  const { w, h } = spineSize(b);
   const hh = hue(b.rank);
-  const bg = `linear-gradient(90deg,hsl(${hh} 34% 33%),hsl(${hh} 38% 42%) 45%,hsl(${hh} 34% 30%))`;
-  const cls = animate && b.rank === lastFinished ? "spine new" : "spine";
-  return `<button type="button" class="${cls}" data-open="${b.rank}" style="width:${w}px;height:${h}px;background:${bg}" aria-label="${esc(b.de)} von ${esc(b.author)}"><span aria-hidden="true">${esc(b.de)}</span></button>`;
+  const base = `linear-gradient(90deg,hsl(${hh} 34% 33%),hsl(${hh} 38% 42%) 45%,hsl(${hh} 34% 30%))`;
+  const url = coverUrl(b.rank, "M");
+  const last = b.author.split(" ").pop();
+  // Autor oben, Titel darunter – Platz und Schriftgröße passend zur Länge
+  const authorLen = Math.min(52, Math.round(last.length * 5.6) + 4);
+  const titleTop = 12 + authorLen + 6;
+  const titleLen = h - titleTop - 14;
+  const chars = b.de.length;
+  let fs = Math.min(11, titleLen / (chars * 0.52));
+  let two = false;
+  if (fs < 8.5 && w >= 30) { two = true; fs = Math.min(10, (titleLen * 2) / (chars * 0.55)); }
+  fs = Math.max(two ? 7.5 : 8, fs).toFixed(1);
+  const cls = ["spine", animate && b.rank === lastFinished ? "new" : ""].join(" ").trim();
+  return `<button type="button" class="${cls}" data-open="${b.rank}" style="width:${w}px;height:${h}px;background:${base}" aria-label="${esc(b.de)} von ${esc(b.author)}">`
+    + (url ? `<span class="tex" style="background-image:url('${url}')"></span>` : "")
+    + `<span class="shade"></span><span class="band" style="top:8px"></span><span class="band" style="bottom:8px"></span>`
+    + `<span class="a" style="top:12px;height:${authorLen}px" aria-hidden="true"><span>${esc(last)}</span></span>`
+    + `<span class="t${two ? " two" : ""}" style="top:${titleTop}px;bottom:14px" aria-hidden="true"><span style="font-size:${fs}px">${esc(b.de)}</span></span></button>`;
+}
+function faceHTML(b, animate) {
+  const cls = animate && b.rank === lastFinished ? "face new" : "face";
+  return `<button type="button" class="${cls}" data-open="${b.rank}" data-cover="${b.rank}" data-size="M" style="--c:${color(b.rank)}" aria-label="${esc(b.de)} von ${esc(b.author)}"><span class="ph"><b>${esc(b.de)}</b></span></button>`;
+}
+function shelfInnerWidth() {
+  const main = document.querySelector("main");
+  const w = (main && main.clientWidth) || 375;
+  return Math.max(230, w - 32 - 16 - 16 - 12); // Seitenränder, Holzrahmen, Fach-Innenabstand, Brett-Innenabstand
 }
 function renderShelf(animate = false) {
   const shelved = BOOKS
@@ -456,12 +594,48 @@ function renderShelf(animate = false) {
   $("#shelfSub").textContent = shelved.length
     ? (shelved.length === TOTAL ? "Geschafft! Alle 100 Bücher stehen im Regal." : `Noch ${TOTAL - shelved.length} Plätze frei`)
     : "Dein Regal ist noch leer. Markiere ein Buch als gelesen, dann steht es hier.";
-  const perShelf = 8, rows = [];
-  for (let i = 0; i < Math.ceil(TOTAL / perShelf); i++) {
-    const slice = shelved.slice(i * perShelf, i * perShelf + perShelf);
-    rows.push(`<div class="shelf"><div class="shelf-books">${slice.map(b => spineHTML(b, animate)).join("")}</div><div class="board"></div></div>`);
+
+  const avail = shelfInnerWidth();
+  const items = shelved.map(b => ({ b, w: shelfMode === "cover" ? 62 : spineSize(b).w }));
+  const avgW = shelfMode === "cover" ? 62 + GAP : 30 + GAP;
+  const minShelves = shelfMode === "cover" ? 5 : Math.max(4, Math.ceil(TOTAL * avgW / avail));
+  const rows = [];
+  let i = 0;
+  for (let s = 0; (i < items.length || s < minShelves) && s < 200; s++) {
+    const plant = PLANTS[s];
+    const cap = avail - (plant ? plant.w + GAP * 2 : 0);
+    const row = [];
+    let used = 0;
+    while (i < items.length && used + items[i].w + (row.length ? GAP : 0) <= cap) {
+      used += items[i].w + (row.length ? GAP : 0);
+      row.push(items[i++]);
+    }
+    if (!row.length && !plant && i < items.length) row.push(items[i++]); // Sicherheitsnetz
+    const books = row.map(({ b }) => shelfMode === "cover" ? faceHTML(b, animate) : spineHTML(b, animate)).join("");
+    const plantHTML = plant ? `<span class="plant ${plant.side}">${plant.svg}</span>` : "";
+    const content = plant && plant.side === "left" ? plantHTML + books : books + plantHTML;
+    rows.push(`<div class="shelf"><div class="shelf-books">${content}</div><div class="board"></div></div>`);
   }
-  $("#shelves").innerHTML = rows.join("");
+  const wall = $("#shelves");
+  wall.innerHTML = rows.join("");
+  hydrateCovers(wall);
+  shelved.forEach(b => { if (needsLookup(b.rank)) requestCover(b.rank); });
+}
+let shelfFrame = 0;
+function scheduleShelf() {
+  if (!$("#view-shelf").classList.contains("active")) return;
+  cancelAnimationFrame(shelfFrame);
+  shelfFrame = requestAnimationFrame(() => renderShelf(false));
+}
+function setShelfMode(mode) {
+  shelfMode = mode;
+  writeJSON("leseregal.shelfmode", mode);
+  document.querySelectorAll("[data-mode]").forEach(b => {
+    const on = b.dataset.mode === mode;
+    b.classList.toggle("on", on);
+    b.setAttribute("aria-pressed", String(on));
+  });
+  renderShelf(false);
 }
 
 /* ---------- Detail ---------- */
@@ -622,6 +796,8 @@ document.addEventListener("click", ev => {
   if (tab) { showTab(tab.dataset.tab); return; }
   const go = t.closest("[data-goto]");
   if (go) { showTab(go.dataset.goto); return; }
+  const m = t.closest("[data-mode]");
+  if (m) { setShelfMode(m.dataset.mode); return; }
   const f = t.closest("[data-filter]");
   if (f) {
     filter = f.dataset.filter;
@@ -673,6 +849,19 @@ window.addEventListener("online", () => {
 });
 
 /* ---------- Start ---------- */
+let resizeTimer = 0;
+window.addEventListener("resize", () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(scheduleShelf, 150);
+});
+
+/* ---------- Start ---------- */
+try { localStorage.removeItem("leseregal.covers.v1"); } catch {}
+document.querySelectorAll("[data-mode]").forEach(b => {
+  const on = b.dataset.mode === shelfMode;
+  b.classList.toggle("on", on);
+  b.setAttribute("aria-pressed", String(on));
+});
 renderAll();
 requestPersist().then(renderBackup);
 if ("serviceWorker" in navigator && location.protocol === "https:") {
