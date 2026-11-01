@@ -1,0 +1,684 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="LeseRegal">
+<meta name="theme-color" content="#f6f1e8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#15120f" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<title>LeseRegal</title>
+<style>
+:root{
+  --bg:#f6f1e8; --card:#fffdf9; --text:#1f1a16; --muted:#7c7168; --line:rgba(60,40,20,.12);
+  --green:#2e7d4f; --blue:#2f6bd0; --star:#e0a526;
+  --wall:#eee3d1; --wood1:#9a643c; --wood2:#6a4223;
+  --tabbg:rgba(250,246,239,.88); --seg:#e9e1d4; --segon:#fffdf9;
+  --shadow:0 1px 2px rgba(60,40,20,.08),0 4px 14px rgba(60,40,20,.06);
+  --serif:"New York",ui-serif,Georgia,"Times New Roman",serif;
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#15120f; --card:#211c18; --text:#f3ede5; --muted:#a59a8f; --line:rgba(255,240,220,.11);
+    --green:#4fb07a; --blue:#6c9cf0;
+    --wall:#1e1915; --wood1:#7a4f2e; --wood2:#4d311a;
+    --tabbg:rgba(30,25,21,.88); --seg:#2c2621; --segon:#453c34; --shadow:none;
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+body.locked{overflow:hidden}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+main{max-width:640px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 8px) 16px calc(90px + env(safe-area-inset-bottom))}
+.view{display:none}
+.view.active{display:block}
+h1{font-family:var(--serif);font-size:34px;font-weight:700;letter-spacing:-.01em;margin:14px 0 14px}
+h2{font-size:17px;margin:0 0 6px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:var(--shadow)}
+.card+.card{margin-top:14px}
+.muted{color:var(--muted);font-size:14px}
+
+/* Fortschritt */
+.progress .big{display:flex;align-items:baseline;gap:8px}
+.progress .num{font:700 46px/1 ui-rounded,-apple-system,system-ui,sans-serif;font-variant-numeric:tabular-nums}
+.progress .of{color:var(--muted);font-size:19px}
+.bar{height:8px;background:var(--seg);border-radius:99px;overflow:hidden;margin:14px 0 10px}
+.bar>div{height:100%;width:0;background:var(--green);border-radius:inherit;transition:width .5s ease}
+.progress .sub{display:flex;justify-content:space-between;gap:8px;color:var(--muted);font-size:13px}
+
+.hint{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-top:12px;padding:12px 14px;border-radius:14px;background:color-mix(in srgb,var(--blue) 13%,var(--card));font-size:14px}
+.hint[hidden]{display:none}
+.hint button{color:var(--blue);font-weight:600;white-space:nowrap}
+
+/* Segmente */
+.segmented{display:flex;background:var(--seg);border-radius:10px;padding:2px;margin:16px 0 10px}
+.segmented button{flex:1;padding:7px 4px;border-radius:8px;font-size:14px;font-weight:500;color:var(--muted);transition:background .2s}
+.segmented button.on{background:var(--segon);color:var(--text);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.13)}
+
+.search{display:block;width:100%;font-size:16px;padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--text);margin-bottom:12px;-webkit-appearance:none;appearance:none}
+
+/* Liste */
+.list{list-style:none;margin:0;padding:0;background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
+.list:empty{display:none}
+.list li+li{border-top:1px solid var(--line)}
+.row{display:flex;align-items:center;gap:12px;width:100%;padding:10px 14px;text-align:left}
+.row:active{background:var(--seg)}
+.meta{flex:1;min-width:0}
+.meta span{display:block}
+.rank{font-size:12px;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums}
+.title{font-weight:600;line-height:1.25;display:-webkit-box!important;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.author{color:var(--muted);font-size:14px;margin-top:1px}
+.st{width:22px;height:22px;flex:none}
+.st.unread{color:var(--muted);opacity:.55}
+.st.reading{color:var(--blue)}
+.st.finished{color:var(--green)}
+.empty{text-align:center;color:var(--muted);padding:28px 0}
+.empty[hidden]{display:none}
+.credit{color:var(--muted);font-size:12px;text-align:center;margin:22px 8px 0}
+
+/* Cover */
+.cover{position:relative;display:block;flex:none;border-radius:4px;overflow:hidden;background:linear-gradient(135deg,var(--c),color-mix(in srgb,var(--c) 72%,#000));box-shadow:0 1px 3px rgba(0,0,0,.22)}
+.cover.s{width:44px;height:66px}
+.cover.l{width:180px;height:270px;margin:6px auto 18px;border-radius:8px;box-shadow:0 12px 28px rgba(0,0,0,.28)}
+.cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .35s}
+.cover img.loaded{opacity:1}
+.ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:4px;text-align:center;color:#fff;font-family:var(--serif);overflow:hidden}
+.ph b{font-size:7px;line-height:1.15}
+.ph i{font-style:normal;font-size:12px;opacity:.85}
+.cover.s .ph i{display:none}
+.cover.l .ph{padding:16px}
+.cover.l .ph b{font-size:19px}
+
+/* Regal */
+.shelf-head{text-align:center;margin:0 0 14px}
+.shelf-head .count{font:700 36px/1.1 var(--serif)}
+.shelf-head p{color:var(--muted);margin:6px 12px 0;font-size:15px}
+.wall{background:var(--wall);border:1px solid var(--line);border-radius:18px;padding:2px 8px 22px}
+.shelf{padding-top:16px}
+.shelf-books{display:flex;align-items:flex-end;gap:3px;height:150px;padding:0 6px}
+.board{height:14px;border-radius:2px;background:linear-gradient(var(--wood1),var(--wood2));box-shadow:0 7px 8px -5px rgba(0,0,0,.45)}
+.spine{position:relative;flex:none;display:flex;align-items:center;justify-content:center;border-radius:3px;overflow:hidden;box-shadow:1px 0 1px rgba(0,0,0,.28)}
+.spine::before,.spine::after{content:"";position:absolute;left:0;right:0;height:2px;background:rgba(255,255,255,.35)}
+.spine::before{top:10px}
+.spine::after{bottom:10px}
+.spine span{writing-mode:vertical-rl;transform:rotate(180deg);font:600 10px/1 var(--serif);color:rgba(255,255,255,.95);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-height:calc(100% - 30px)}
+.spine.new{animation:drop .7s cubic-bezier(.2,.9,.3,1.25) both}
+@keyframes drop{from{transform:translateY(-60px);opacity:0}to{transform:none;opacity:1}}
+
+/* Backup */
+.primary,.secondary{display:block;width:100%;padding:13px;border-radius:12px;font-weight:600;margin-top:12px;text-align:center}
+.primary{background:var(--green);color:#fff}
+.secondary{background:var(--seg)}
+.danger{color:#c0392b;font-size:14px;margin-top:14px;display:block;width:100%;text-align:center;padding:8px}
+ol{padding-left:20px;margin:6px 0 0}
+ol li{margin:4px 0}
+
+/* Tabbar */
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:10;display:flex;justify-content:center;background:var(--tabbg);-webkit-backdrop-filter:saturate(1.6) blur(18px);backdrop-filter:saturate(1.6) blur(18px);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom))}
+.tabbar button{flex:1;max-width:160px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 0;font-size:11px;font-weight:500;color:var(--muted)}
+.tabbar svg{width:26px;height:26px}
+.tabbar button[aria-selected="true"]{color:var(--green)}
+
+/* Detail-Blatt */
+.sheet{position:fixed;inset:0;z-index:20}
+.sheet[hidden]{display:none}
+.sheet-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.38);opacity:0;transition:opacity .28s}
+.sheet-panel{position:absolute;left:0;right:0;bottom:0;top:calc(env(safe-area-inset-top) + 22px);max-width:640px;margin:0 auto;display:flex;flex-direction:column;background:var(--bg);border-radius:18px 18px 0 0;transform:translateY(100%);transition:transform .34s cubic-bezier(.2,.8,.2,1)}
+.sheet.open .sheet-backdrop{opacity:1}
+.sheet.open .sheet-panel{transform:none}
+.sheet-bar{position:relative;display:flex;justify-content:flex-end;padding:10px 14px 0}
+.grab{position:absolute;left:50%;top:7px;width:36px;height:5px;margin-left:-18px;border-radius:3px;background:var(--line)}
+.sheet-bar button{color:var(--green);font-weight:600;padding:6px 4px}
+.sheet-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:0 20px calc(28px + env(safe-area-inset-bottom));text-align:center}
+.d-rank{margin:0;font-size:13px;font-weight:600;color:var(--muted)}
+.d-title{margin:4px 0;font-family:var(--serif);font-size:25px;line-height:1.2}
+.d-en{margin:0 0 4px;font-style:italic;color:var(--muted)}
+.d-author{margin:4px 0 0;font-weight:600}
+.rating p{margin:14px 0 4px;font-size:14px;color:var(--muted)}
+.stars{display:flex;justify-content:center;gap:4px}
+.stars button{font-size:32px;line-height:1;padding:2px 3px;color:var(--star)}
+.dates{margin:14px 0;font-size:13px;color:var(--muted)}
+.dates p{margin:2px 0}
+.notes{display:block;text-align:left;margin-top:8px}
+.notes span{display:block;font-weight:600;margin-bottom:6px}
+textarea{display:block;width:100%;min-height:120px;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--text);font:16px/1.4 -apple-system,system-ui,sans-serif;resize:vertical}
+
+/* Toast */
+.toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 14px);z-index:30;transform:translate(-50%,-200%);opacity:0;pointer-events:none;background:var(--green);color:#fff;font-weight:600;padding:10px 18px;border-radius:99px;box-shadow:0 6px 18px rgba(0,0,0,.2);white-space:nowrap;transition:transform .35s cubic-bezier(.2,.9,.3,1.2),opacity .25s}
+.toast.warn{background:#c0392b}
+.toast.show{transform:translate(-50%,0);opacity:1}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+<main>
+  <!-- LISTE -->
+  <section id="view-list" class="view active" aria-labelledby="h-list">
+    <h1 id="h-list">100 Bücher</h1>
+    <div class="card progress">
+      <div class="big"><span class="num" id="finishedCount">0</span><span class="of">von 100 gelesen</span></div>
+      <div class="bar" id="bar" role="progressbar" aria-label="Lesefortschritt" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="barFill"></div></div>
+      <div class="sub"><span id="readingCount"></span><span id="remainingCount"></span></div>
+    </div>
+    <div class="hint" id="backupHint" hidden>
+      <span id="backupHintText"></span>
+      <button type="button" data-goto="backup">Sichern</button>
+    </div>
+    <div class="segmented" id="filter" role="group" aria-label="Filter">
+      <button type="button" class="on" data-filter="all" aria-pressed="true">Alle</button>
+      <button type="button" data-filter="unread" aria-pressed="false">Offen</button>
+      <button type="button" data-filter="reading" aria-pressed="false">Lese ich</button>
+      <button type="button" data-filter="finished" aria-pressed="false">Gelesen</button>
+    </div>
+    <input class="search" id="search" type="search" placeholder="Titel oder Autor*in suchen" aria-label="Suchen" autocomplete="off" enterkeyhint="search">
+    <ul class="list" id="bookList"></ul>
+    <p class="empty" id="emptyList" hidden>Keine Bücher in dieser Ansicht.</p>
+    <p class="credit">Liste: Leser*innen-Wahl der New York Times, deutsche Titel nach egoFM. Cover: Open Library.</p>
+  </section>
+
+  <!-- REGAL -->
+  <section id="view-shelf" class="view" aria-labelledby="h-shelf">
+    <h1 id="h-shelf">Mein Regal</h1>
+    <div class="shelf-head">
+      <div class="count" id="shelfCount">0 / 100</div>
+      <p id="shelfSub"></p>
+    </div>
+    <div class="wall" id="shelves"></div>
+  </section>
+
+  <!-- BACKUP -->
+  <section id="view-backup" class="view" aria-labelledby="h-backup">
+    <h1 id="h-backup">Backup</h1>
+    <div class="card">
+      <h2>Deine Daten sichern</h2>
+      <p class="muted">Deine Einträge sind nur auf diesem Gerät gespeichert. Sichere sie ab und zu als Datei, am besten in iCloud Drive. Mit „Backup laden“ holst du sie jederzeit zurück, auch auf einem neuen iPhone.</p>
+      <p class="muted" id="lastBackupText"></p>
+      <button type="button" class="primary" id="exportBtn">Backup speichern</button>
+      <button type="button" class="secondary" id="importBtn">Backup laden</button>
+      <input type="file" id="importFile" accept="application/json,.json" hidden>
+    </div>
+    <div class="card" id="installCard">
+      <h2>Als App auf den Homescreen</h2>
+      <p class="muted">So läuft LeseRegal wie eine richtige App und deine Daten sind besser geschützt:</p>
+      <ol class="muted">
+        <li>Diese Seite in <b>Safari</b> öffnen.</li>
+        <li>Unten auf das <b>Teilen</b>-Symbol tippen (Quadrat mit Pfeil).</li>
+        <li><b>„Zum Home-Bildschirm“</b> wählen und <b>„Hinzufügen“</b> tippen.</li>
+        <li>Ab jetzt nur noch über das neue Symbol öffnen.</li>
+      </ol>
+    </div>
+    <div class="card">
+      <h2>Speicher</h2>
+      <p class="muted" id="persistText">Wird geprüft …</p>
+      <button type="button" class="danger" id="resetBtn">Alle Einträge löschen</button>
+    </div>
+  </section>
+</main>
+
+<nav class="tabbar" role="tablist" aria-label="Bereiche">
+  <button type="button" role="tab" data-tab="list" aria-selected="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.3" fill="currentColor" stroke="none"/><circle cx="4.5" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="4.5" cy="18" r="1.3" fill="currentColor" stroke="none"/></svg>
+    Liste
+  </button>
+  <button type="button" role="tab" data-tab="shelf" aria-selected="false">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="4" width="4" height="15" rx="1"/><rect x="8.5" y="6.5" width="4" height="12.5" rx="1"/><path d="M14.2 7.4l3.6-1 3.3 12.2-3.6 1z"/><path d="M2 21h20" stroke-linecap="round"/></svg>
+    Regal
+  </button>
+  <button type="button" role="tab" data-tab="backup" aria-selected="false">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18 8.5a4 4 0 0 1-.5 9.5"/><path d="M12 12v8M9 15l3-3 3 3"/></svg>
+    Backup
+  </button>
+</nav>
+
+<div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-label="Buchdetails">
+  <div class="sheet-backdrop" data-close></div>
+  <div class="sheet-panel">
+    <div class="sheet-bar"><span class="grab"></span><button type="button" id="closeSheet" data-close>Fertig</button></div>
+    <div class="sheet-body" id="sheetBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+"use strict";
+
+const BOOKS = [{"rank": 1, "de": "Demon Copperhead", "en": "Demon Copperhead", "author": "Barbara Kingsolver"}, {"rank": 2, "de": "Alles Licht, das wir nicht sehen", "en": "All the Light We Cannot See", "author": "Anthony Doerr"}, {"rank": 3, "de": "Ein Gentleman in Moskau", "en": "A Gentleman in Moscow", "author": "Amor Towles"}, {"rank": 4, "de": "Der Distelfink", "en": "The Goldfinch", "author": "Donna Tartt"}, {"rank": 5, "de": "Ein einfaches Leben", "en": "Pachinko", "author": "Min Jin Lee"}, {"rank": 6, "de": "Befreit", "en": "Educated", "author": "Tara Westover"}, {"rank": 7, "de": "Morgen, morgen und wieder morgen", "en": "Tomorrow, and Tomorrow, and Tomorrow", "author": "Gabrielle Zevin"}, {"rank": 8, "de": "Meine geniale Freundin", "en": "My Brilliant Friend", "author": "Elena Ferrante"}, {"rank": 9, "de": "Alles, was wir geben mussten", "en": "Never Let Me Go", "author": "Kazuo Ishiguro"}, {"rank": 10, "de": "Station Eleven", "en": "Station Eleven", "author": "Emily St. John Mandel"}, {"rank": 11, "de": "Ein wenig Leben", "en": "A Little Life", "author": "Hanya Yanagihara"}, {"rank": 12, "de": "Die Wurzeln des Lebens", "en": "The Overstory", "author": "Richard Powers"}, {"rank": 13, "de": "Underground Railroad", "en": "The Underground Railroad", "author": "Colson Whitehead"}, {"rank": 14, "de": "Wölfe", "en": "Wolf Hall", "author": "Hilary Mantel"}, {"rank": 15, "de": "Die Straße", "en": "The Road", "author": "Cormac McCarthy"}, {"rank": 16, "de": "Lincoln im Bardo", "en": "Lincoln in the Bardo", "author": "George Saunders"}, {"rank": 17, "de": "Abbitte", "en": "Atonement", "author": "Ian McEwan"}, {"rank": 18, "de": "Middlesex", "en": "Middlesex", "author": "Jeffrey Eugenides"}, {"rank": 19, "de": "Americanah", "en": "Americanah", "author": "Chimamanda Ngozi Adichie"}, {"rank": 20, "de": "Die unglaublichen Abenteuer von Kavalier & Clay", "en": "The Amazing Adventures of Kavalier & Clay", "author": "Michael Chabon"}, {"rank": 21, "de": "Heimkehren", "en": "Homegoing", "author": "Yaa Gyasi"}, {"rank": 22, "de": "Judith und Hamnet", "en": "Hamnet", "author": "Maggie O'Farrell"}, {"rank": 23, "de": "Die Wärme anderer Sonnen", "en": "The Warmth of Other Suns", "author": "Isabel Wilkerson"}, {"rank": 24, "de": "Bel Canto", "en": "Bel Canto", "author": "Ann Patchett"}, {"rank": 25, "de": "Gilead", "en": "Gilead", "author": "Marilynne Robinson"}, {"rank": 26, "de": "Die Korrekturen", "en": "The Corrections", "author": "Jonathan Franzen"}, {"rank": 27, "de": "Normale Menschen", "en": "Normal People", "author": "Sally Rooney"}, {"rank": 28, "de": "Rückkehr nach Missing", "en": "Cutting for Stone", "author": "Abraham Verghese"}, {"rank": 29, "de": "Sage nichts", "en": "Say Nothing", "author": "Patrick Radden Keefe"}, {"rank": 30, "de": "Der größere Teil der Welt", "en": "A Visit From the Goon Squad", "author": "Jennifer Egan"}, {"rank": 31, "de": "Ich bin Circe", "en": "Circe", "author": "Madeline Miller"}, {"rank": 32, "de": "Wolkenkuckucksland", "en": "Cloud Cuckoo Land", "author": "Anthony Doerr"}, {"rank": 33, "de": "Die Bücherdiebin", "en": "The Book Thief", "author": "Markus Zusak"}, {"rank": 34, "de": "Der Wolkenatlas", "en": "Cloud Atlas", "author": "David Mitchell"}, {"rank": 35, "de": "Die Träumenden von Madras", "en": "The Covenant of Water", "author": "Abraham Verghese"}, {"rank": 36, "de": "Das Jahr magischen Denkens", "en": "The Year of Magical Thinking", "author": "Joan Didion"}, {"rank": 37, "de": "Die Nickel Boys", "en": "The Nickel Boys", "author": "Colson Whitehead"}, {"rank": 38, "de": "Die Optimisten", "en": "The Great Believers", "author": "Rebecca Makkai"}, {"rank": 39, "de": "Mit Blick aufs Meer", "en": "Olive Kitteridge", "author": "Elizabeth Strout"}, {"rank": 40, "de": "Drachenläufer", "en": "The Kite Runner", "author": "Khaled Hosseini"}, {"rank": 41, "de": "Das Unvollendete", "en": "Life After Life", "author": "Kate Atkinson"}, {"rank": 42, "de": "Das kurze wundersame Leben des Oscar Wao", "en": "The Brief Wondrous Life of Oscar Wao", "author": "Junot Díaz"}, {"rank": 43, "de": "Zwischen mir und der Welt", "en": "Between the World and Me", "author": "Ta-Nehisi Coates"}, {"rank": 44, "de": "Himmel & Erde", "en": "The Heaven & Earth Grocery Store", "author": "James McBride"}, {"rank": 45, "de": "Dort dort", "en": "There There", "author": "Tommy Orange"}, {"rank": 46, "de": "Das Lied des Achill", "en": "The Song of Achilles", "author": "Madeline Miller"}, {"rank": 47, "de": "Eine Frage der Chemie", "en": "Lessons in Chemistry", "author": "Bonnie Garmus"}, {"rank": 48, "de": "Auf Erden sind wir kurz grandios", "en": "On Earth We're Briefly Gorgeous", "author": "Ocean Vuong"}, {"rank": 49, "de": "Gone Girl", "en": "Gone Girl", "author": "Gillian Flynn"}, {"rank": 50, "de": "James", "en": "James", "author": "Percival Everett"}, {"rank": 51, "de": "Kaste: Die Ursprünge unseres Unbehagens", "en": "Caste: The Origins of Our Discontents", "author": "Isabel Wilkerson"}, {"rank": 52, "de": "Die Nachtigall", "en": "The Nightingale", "author": "Kristin Hannah"}, {"rank": 53, "de": "Treue", "en": "Trust", "author": "Hernan Diaz"}, {"rank": 54, "de": "Der Anschlag", "en": "11/22/63", "author": "Stephen King"}, {"rank": 55, "de": "Geflochtenes Süßgras", "en": "Braiding Sweetgrass", "author": "Robin Wall Kimmerer"}, {"rank": 56, "de": "Die Tribute von Panem", "en": "The Hunger Games", "author": "Suzanne Collins"}, {"rank": 57, "de": "Kleine Dinge wie diese", "en": "Small Things Like These", "author": "Claire Keegan"}, {"rank": 58, "de": "Zähne zeigen", "en": "White Teeth", "author": "Zadie Smith"}, {"rank": 59, "de": "Der Gesang der Flusskrebse", "en": "Where the Crawdads Sing", "author": "Delia Owens"}, {"rank": 60, "de": "Das Holländerhaus", "en": "The Dutch House", "author": "Ann Patchett"}, {"rank": 61, "de": "Oben in den Wäldern", "en": "North Woods", "author": "Daniel Mason"}, {"rank": 62, "de": "Der Sympathisant", "en": "The Sympathizer", "author": "Viet Thanh Nguyen"}, {"rank": 63, "de": "Zerrissene Erde", "en": "The Fifth Season", "author": "N.K. Jemisin"}, {"rank": 64, "de": "2666", "en": "2666", "author": "Roberto Bolaño"}, {"rank": 65, "de": "Zwangsgeräumt", "en": "Evicted", "author": "Matthew Desmond"}, {"rank": 66, "de": "Just Kids", "en": "Just Kids", "author": "Patti Smith"}, {"rank": 67, "de": "Piranesi", "en": "Piranesi", "author": "Susanna Clarke"}, {"rank": 68, "de": "Der Teufel von Chicago", "en": "The Devil in the White City", "author": "Erik Larson"}, {"rank": 69, "de": "Das Verbrechen", "en": "Killers of the Flower Moon", "author": "David Grann"}, {"rank": 70, "de": "Ich habe einen Namen", "en": "Know My Name", "author": "Chanel Miller"}, {"rank": 71, "de": "Singt, ihr Lebenden und ihr Toten, singt", "en": "Sing, Unburied, Sing", "author": "Jesmyn Ward"}, {"rank": 72, "de": "Tränen im Asia-Markt", "en": "Crying in H Mart", "author": "Michelle Zauner"}, {"rank": 73, "de": "Harry Potter und die Heiligtümer des Todes", "en": "Harry Potter and the Deathly Hallows", "author": "J.K. Rowling"}, {"rank": 74, "de": "Klara und die Sonne", "en": "Klara and the Sun", "author": "Kazuo Ishiguro"}, {"rank": 75, "de": "Lincoln Highway", "en": "The Lincoln Highway", "author": "Amor Towles"}, {"rank": 76, "de": "Ohne Gnade", "en": "Just Mercy", "author": "Bryan Stevenson"}, {"rank": 77, "de": "Eine kurze Geschichte der Menschheit", "en": "Sapiens: A Brief History of Humankind", "author": "Yuval Noah Harari"}, {"rank": 78, "de": "Kafka am Strand", "en": "Kafka on the Shore", "author": "Haruki Murakami"}, {"rank": 79, "de": "1Q84", "en": "1Q84", "author": "Haruki Murakami"}, {"rank": 80, "de": "Der heilige Königskong", "en": "Deacon King Kong", "author": "James McBride"}, {"rank": 81, "de": "Die Unsterblichkeit der Henrietta Lacks", "en": "The Immortal Life of Henrietta Lacks", "author": "Rebecca Skloot"}, {"rank": 82, "de": "Der Sommer zuhause", "en": "Tom Lake", "author": "Ann Patchett"}, {"rank": 83, "de": "Die große Welt", "en": "Let the Great World Spin", "author": "Colum McCann"}, {"rank": 84, "de": "Zehnter Dezember", "en": "Tenth of December", "author": "George Saunders"}, {"rank": 85, "de": "Bevor ich jetzt gehe", "en": "When Breath Becomes Air", "author": "Paul Kalanithi"}, {"rank": 86, "de": "Schiffbruch mit Tiger", "en": "Life of Pi", "author": "Yann Martel"}, {"rank": 87, "de": "Mädchen, Frau, etc.", "en": "Girl, Woman, Other", "author": "Bernardine Evaristo"}, {"rank": 88, "de": "Verschwörung gegen Amerika", "en": "The Plot Against America", "author": "Philip Roth"}, {"rank": 89, "de": "Schloss aus Glas", "en": "The Glass Castle", "author": "Jeannette Walls"}, {"rank": 90, "de": "Das Archiv der Träume", "en": "In the Dream House", "author": "Carmen Maria Machado"}, {"rank": 91, "de": "Der Astronaut", "en": "Project Hail Mary", "author": "Andy Weir"}, {"rank": 92, "de": "Gesang der Fledermäuse", "en": "Drive Your Plow Over the Bones of the Dead", "author": "Olga Tokarczuk"}, {"rank": 93, "de": "Das Glück hat acht Arme", "en": "Remarkably Bright Creatures", "author": "Shelby Van Pelt"}, {"rank": 94, "de": "Der Stich der Biene", "en": "The Bee Sting", "author": "Paul Murray"}, {"rank": 95, "de": "Tausend strahlende Sonnen", "en": "A Thousand Splendid Suns", "author": "Khaled Hosseini"}, {"rank": 96, "de": "Die verschwindende Hälfte", "en": "The Vanishing Half", "author": "Brit Bennett"}, {"rank": 97, "de": "Mein Jahr der Ruhe und Entspannung", "en": "My Year of Rest and Relaxation", "author": "Ottessa Moshfegh"}, {"rank": 98, "de": "Shuggie Bain", "en": "Shuggie Bain", "author": "Douglas Stuart"}, {"rank": 99, "de": "Imperium der Schmerzen", "en": "Empire of Pain", "author": "Patrick Radden Keefe"}, {"rank": 100, "de": "Ein Mann namens Ove", "en": "A Man Called Ove", "author": "Fredrik Backman"}];
+const byRank = Object.fromEntries(BOOKS.map(b => [b.rank, b]));
+const TOTAL = BOOKS.length;
+const STATUSES = [
+  { id: "unread",   short: "Offen",    label: "Noch zu lesen" },
+  { id: "reading",  short: "Lese ich", label: "Lese ich gerade" },
+  { id: "finished", short: "Gelesen",  label: "Gelesen" },
+];
+const STORE_KEY = "leseregal.v1";
+const COVER_KEY = "leseregal.covers.v1";
+const $ = s => document.querySelector(s);
+
+/* ---------- Speichern ---------- */
+function readJSON(key, fallback) {
+  try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; }
+  catch { return fallback; }
+}
+function writeJSON(key, value) {
+  try { localStorage.setItem(key, JSON.stringify(value)); return true; }
+  catch { return false; }
+}
+
+let state = readJSON(STORE_KEY, null);
+if (!state || typeof state !== "object" || !state.books || typeof state.books !== "object") {
+  state = { books: {}, lastBackup: null, firstChangeAt: null };
+}
+let coverCache = readJSON(COVER_KEY, {}) || {};
+let filter = "all", query = "", currentRank = null, lastFinished = null, saveWarned = false, lastFocus = null;
+
+function save() {
+  if (!writeJSON(STORE_KEY, state) && !saveWarned) {
+    saveWarned = true;
+    toast("Speichern nicht möglich", true);
+  }
+}
+function entry(rank) {
+  return state.books[rank] || { status: "unread", rating: 0, notes: "", startedAt: null, finishedAt: null };
+}
+function setEntry(rank, patch) {
+  state.books[rank] = { ...entry(rank), ...patch };
+  if (!state.firstChangeAt) state.firstChangeAt = new Date().toISOString();
+  save();
+}
+function setStatus(rank, status) {
+  const e = entry(rank), now = new Date().toISOString();
+  const patch = { status };
+  if (status === "unread") { patch.startedAt = null; patch.finishedAt = null; }
+  else if (status === "reading") { patch.startedAt = e.startedAt || now; patch.finishedAt = null; }
+  else { patch.startedAt = e.startedAt || now; patch.finishedAt = now; }
+  setEntry(rank, patch);
+}
+function hasData() {
+  return Object.values(state.books).some(e => e.status !== "unread" || e.rating || (e.notes && e.notes.trim()));
+}
+function daysSince(iso) { return (Date.now() - Date.parse(iso)) / 86400000; }
+
+/* ---------- Helfer ---------- */
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+function hue(rank) { return Math.round(((rank * 0.618034) % 1) * 360); }
+function color(rank) { return `hsl(${hue(rank)} 34% 40%)`; }
+function fmtDate(iso) {
+  return new Date(iso).toLocaleDateString("de-DE", { day: "numeric", month: "long", year: "numeric" });
+}
+function statusIcon(s) {
+  const label = STATUSES.find(x => x.id === s).label;
+  let inner;
+  if (s === "finished") inner = '<circle cx="12" cy="12" r="10" fill="currentColor"/><path d="M7.5 12.5l3 3 6-6.5" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>';
+  else if (s === "reading") inner = '<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/>';
+  else inner = '<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/>';
+  return `<svg class="st ${s}" viewBox="0 0 24 24" role="img" aria-label="${label}">${inner}</svg>`;
+}
+function placeholder(b) {
+  return `<span class="ph"><b>${esc(b.de)}</b><i>${esc(b.author)}</i></span>`;
+}
+function coverHTML(b, size) {
+  return `<span class="cover ${size === "L" ? "l" : "s"}" data-rank="${b.rank}" data-size="${size}" style="--c:${color(b.rank)}" aria-hidden="true">${placeholder(b)}</span>`;
+}
+
+let toastTimer = null;
+function toast(text, warn = false) {
+  const t = $("#toast");
+  t.textContent = text;
+  t.classList.toggle("warn", warn);
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show"), 2200);
+}
+
+/* ---------- Cover (Open Library) ---------- */
+const coverQueue = [], pending = new Set(), failedAt = {};
+let activeLookups = 0;
+const RETRY_MS = 5 * 60 * 1000;
+
+function insertImg(el, id) {
+  if (el.querySelector("img")) return;
+  const img = new Image();
+  img.alt = "";
+  img.decoding = "async";
+  img.loading = "lazy";
+  img.onload = () => img.classList.add("loaded");
+  img.onerror = () => img.remove();
+  img.src = `https://covers.openlibrary.org/b/id/${id}-${el.dataset.size || "M"}.jpg?default=false`;
+  el.appendChild(img);
+}
+function hydrateCovers(root) {
+  root.querySelectorAll(".cover[data-rank]").forEach(el => {
+    const rank = +el.dataset.rank;
+    if (typeof coverCache[rank] === "number") insertImg(el, coverCache[rank]);
+    else if (!(rank in coverCache)) requestCover(rank);
+  });
+}
+function requestCover(rank) {
+  if (rank in coverCache || pending.has(rank)) return;
+  if (navigator.onLine === false) return;
+  if (failedAt[rank] && Date.now() - failedAt[rank] < RETRY_MS) return;
+  pending.add(rank);
+  coverQueue.push(rank);
+  pump();
+}
+function pump() {
+  while (activeLookups < 4 && coverQueue.length) {
+    const rank = coverQueue.shift();
+    activeLookups++;
+    lookupCover(rank).finally(() => { activeLookups--; pending.delete(rank); pump(); });
+  }
+}
+async function lookupCover(rank) {
+  const b = byRank[rank];
+  const params = new URLSearchParams({ title: b.en, author: b.author, fields: "cover_i", limit: "5" });
+  try {
+    const res = await fetch(`https://openlibrary.org/search.json?${params}`);
+    if (!res.ok) { failedAt[rank] = Date.now(); return; }
+    const data = await res.json();
+    const id = (data.docs || []).map(d => d.cover_i).find(Boolean) ?? null;
+    coverCache[rank] = id;
+    writeJSON(COVER_KEY, coverCache);
+    if (id) document.querySelectorAll(`.cover[data-rank="${rank}"]`).forEach(el => insertImg(el, id));
+  } catch { failedAt[rank] = Date.now(); /* offline – später erneut versuchen */ }
+}
+
+/* ---------- Liste ---------- */
+function rowHTML(b) {
+  const e = entry(b.rank);
+  return `<li><button type="button" class="row" data-open="${b.rank}">${coverHTML(b, "M")}<span class="meta"><span class="rank">#${b.rank}</span><span class="title">${esc(b.de)}</span><span class="author">${esc(b.author)}</span></span>${statusIcon(e.status)}</button></li>`;
+}
+function matches(b) {
+  const e = entry(b.rank);
+  if (filter !== "all" && e.status !== filter) return false;
+  if (!query) return true;
+  const q = query.toLowerCase();
+  return b.de.toLowerCase().includes(q) || b.en.toLowerCase().includes(q) || b.author.toLowerCase().includes(q);
+}
+function renderList() {
+  let finished = 0, reading = 0;
+  BOOKS.forEach(b => {
+    const s = entry(b.rank).status;
+    if (s === "finished") finished++;
+    else if (s === "reading") reading++;
+  });
+  $("#finishedCount").textContent = finished;
+  $("#barFill").style.width = (finished / TOTAL * 100) + "%";
+  $("#bar").setAttribute("aria-valuenow", String(finished));
+  $("#readingCount").textContent = `${reading} lese ich gerade`;
+  $("#remainingCount").textContent = `noch ${TOTAL - finished}`;
+
+  const needsBackup = hasData() && (state.lastBackup
+    ? daysSince(state.lastBackup) > 14
+    : (state.firstChangeAt && daysSince(state.firstChangeAt) > 2));
+  $("#backupHint").hidden = !needsBackup;
+  if (needsBackup) {
+    $("#backupHintText").textContent = state.lastBackup
+      ? `Dein letztes Backup ist ${Math.floor(daysSince(state.lastBackup))} Tage her.`
+      : "Du hast noch kein Backup gespeichert.";
+  }
+
+  const items = BOOKS.filter(matches);
+  const list = $("#bookList");
+  list.innerHTML = items.map(rowHTML).join("");
+  $("#emptyList").hidden = items.length > 0;
+  hydrateCovers(list);
+}
+
+/* ---------- Regal ---------- */
+function spineHTML(b, animate) {
+  const w = 24 + (b.rank * 7) % 11;
+  const h = 112 + (b.rank * 13) % 30;
+  const hh = hue(b.rank);
+  const bg = `linear-gradient(90deg,hsl(${hh} 34% 33%),hsl(${hh} 38% 42%) 45%,hsl(${hh} 34% 30%))`;
+  const cls = animate && b.rank === lastFinished ? "spine new" : "spine";
+  return `<button type="button" class="${cls}" data-open="${b.rank}" style="width:${w}px;height:${h}px;background:${bg}" aria-label="${esc(b.de)} von ${esc(b.author)}"><span aria-hidden="true">${esc(b.de)}</span></button>`;
+}
+function renderShelf(animate = false) {
+  const shelved = BOOKS
+    .filter(b => entry(b.rank).status === "finished")
+    .sort((a, b) => (entry(a.rank).finishedAt || "").localeCompare(entry(b.rank).finishedAt || ""));
+  $("#shelfCount").textContent = `${shelved.length} / ${TOTAL}`;
+  $("#shelfSub").textContent = shelved.length
+    ? (shelved.length === TOTAL ? "Geschafft! Alle 100 Bücher stehen im Regal." : `Noch ${TOTAL - shelved.length} Plätze frei`)
+    : "Dein Regal ist noch leer. Markiere ein Buch als gelesen, dann steht es hier.";
+  const perShelf = 8, rows = [];
+  for (let i = 0; i < Math.ceil(TOTAL / perShelf); i++) {
+    const slice = shelved.slice(i * perShelf, i * perShelf + perShelf);
+    rows.push(`<div class="shelf"><div class="shelf-books">${slice.map(b => spineHTML(b, animate)).join("")}</div><div class="board"></div></div>`);
+  }
+  $("#shelves").innerHTML = rows.join("");
+}
+
+/* ---------- Detail ---------- */
+function sheetHTML(b) {
+  const e = entry(b.rank);
+  const seg = STATUSES.map(s =>
+    `<button type="button" role="radio" aria-checked="${e.status === s.id}" class="${e.status === s.id ? "on" : ""}" data-status="${s.id}">${s.short}</button>`).join("");
+  const stars = [1, 2, 3, 4, 5].map(n =>
+    `<button type="button" data-star="${n}" aria-label="${n} ${n === 1 ? "Stern" : "Sterne"}" aria-pressed="${n <= e.rating}">${n <= e.rating ? "★" : "☆"}</button>`).join("");
+  return `
+    ${coverHTML(b, "L")}
+    <p class="d-rank">Platz ${b.rank}</p>
+    <h2 class="d-title">${esc(b.de)}</h2>
+    ${b.en !== b.de ? `<p class="d-en">${esc(b.en)}</p>` : ""}
+    <p class="d-author">${esc(b.author)}</p>
+    <div class="segmented" role="radiogroup" aria-label="Lesestatus">${seg}</div>
+    ${e.status === "finished" ? `<div class="rating"><p>Deine Bewertung</p><div class="stars">${stars}</div></div>` : ""}
+    <div class="dates">
+      ${e.startedAt ? `<p>Begonnen am ${fmtDate(e.startedAt)}</p>` : ""}
+      ${e.finishedAt ? `<p>Beendet am ${fmtDate(e.finishedAt)}</p>` : ""}
+    </div>
+    <label class="notes"><span>Notizen</span><textarea id="notes" placeholder="Gedanken, Lieblingszitate …">${esc(e.notes || "")}</textarea></label>`;
+}
+function renderSheet() {
+  if (currentRank == null) return;
+  const body = $("#sheetBody");
+  body.innerHTML = sheetHTML(byRank[currentRank]);
+  hydrateCovers(body);
+}
+function openSheet(rank) {
+  currentRank = rank;
+  lastFocus = document.activeElement;
+  renderSheet();
+  $("#sheetBody").scrollTop = 0;
+  const sheet = $("#sheet");
+  sheet.hidden = false;
+  document.body.classList.add("locked");
+  requestAnimationFrame(() => requestAnimationFrame(() => sheet.classList.add("open")));
+  $("#closeSheet").focus({ preventScroll: true });
+}
+function closeSheet() {
+  const sheet = $("#sheet");
+  if (sheet.hidden) return;
+  sheet.classList.remove("open");
+  document.body.classList.remove("locked");
+  setTimeout(() => { sheet.hidden = true; currentRank = null; }, 340);
+  if (lastFocus && document.contains(lastFocus)) lastFocus.focus({ preventScroll: true });
+}
+function changeStatus(rank, status) {
+  if (entry(rank).status === status) return;
+  setStatus(rank, status);
+  if (status === "finished") { lastFinished = rank; toast("Ins Regal gestellt!"); }
+  renderSheet();
+  renderList();
+  renderShelf();
+}
+
+/* ---------- Backup ---------- */
+function markBackup() {
+  state.lastBackup = new Date().toISOString();
+  save();
+  renderBackup();
+  renderList();
+}
+async function exportBackup() {
+  const data = { app: "LeseRegal", version: 1, exportedAt: new Date().toISOString(), books: state.books };
+  const name = `LeseRegal-Backup-${new Date().toISOString().slice(0, 10)}.json`;
+  const file = new File([JSON.stringify(data, null, 2)], name, { type: "application/json" });
+  try {
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: "LeseRegal Backup" });
+      markBackup();
+      toast("Backup gespeichert");
+      return;
+    }
+  } catch (err) {
+    if (err && err.name === "AbortError") return;
+  }
+  const url = URL.createObjectURL(file);
+  const a = document.createElement("a");
+  a.href = url; a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+  markBackup();
+  toast("Backup gespeichert");
+}
+function validDate(s) { return typeof s === "string" && !isNaN(Date.parse(s)) ? s : null; }
+function sanitize(books) {
+  if (!books || typeof books !== "object") return null;
+  const out = {};
+  for (const [key, v] of Object.entries(books)) {
+    const rank = +key;
+    if (!byRank[rank] || !v || typeof v !== "object") continue;
+    out[rank] = {
+      status: STATUSES.some(s => s.id === v.status) ? v.status : "unread",
+      rating: Number.isInteger(v.rating) && v.rating >= 0 && v.rating <= 5 ? v.rating : 0,
+      notes: typeof v.notes === "string" ? v.notes.slice(0, 20000) : "",
+      startedAt: validDate(v.startedAt),
+      finishedAt: validDate(v.finishedAt),
+    };
+  }
+  return out;
+}
+async function importBackup(file) {
+  let data;
+  try { data = JSON.parse(await file.text()); }
+  catch { toast("Das ist keine gültige Backup-Datei", true); return; }
+  const books = sanitize(data && data.books);
+  if (!books || data.app !== "LeseRegal") { toast("Das ist keine gültige Backup-Datei", true); return; }
+  const when = validDate(data.exportedAt) ? ` vom ${fmtDate(data.exportedAt)}` : "";
+  if (!confirm(`Backup${when} laden? Deine aktuellen Einträge auf diesem Gerät werden dadurch ersetzt.`)) return;
+  state.books = books;
+  if (!state.firstChangeAt) state.firstChangeAt = new Date().toISOString();
+  state.lastBackup = validDate(data.exportedAt) || new Date().toISOString();
+  save();
+  renderAll();
+  toast("Backup geladen");
+}
+function isStandalone() {
+  return window.navigator.standalone === true || matchMedia("(display-mode: standalone)").matches;
+}
+async function renderBackup() {
+  $("#lastBackupText").textContent = state.lastBackup
+    ? `Letztes Backup: ${fmtDate(state.lastBackup)}`
+    : "Du hast noch kein Backup gespeichert.";
+  $("#installCard").hidden = isStandalone();
+  let text = "Dein Gerät entscheidet selbst über den Speicher. Als Homescreen-App und mit regelmäßigem Backup bist du auf der sicheren Seite.";
+  try {
+    if (navigator.storage && navigator.storage.persisted && await navigator.storage.persisted()) {
+      text = "Dauerhafter Speicher ist aktiv. Deine Einträge werden nicht automatisch aufgeräumt.";
+    }
+  } catch {}
+  $("#persistText").textContent = text;
+}
+async function requestPersist() {
+  try {
+    if (navigator.storage && navigator.storage.persist && !(await navigator.storage.persisted())) {
+      await navigator.storage.persist();
+    }
+  } catch {}
+}
+
+/* ---------- Navigation ---------- */
+function showTab(name) {
+  document.querySelectorAll(".view").forEach(v => v.classList.toggle("active", v.id === "view-" + name));
+  document.querySelectorAll("[data-tab]").forEach(b => b.setAttribute("aria-selected", String(b.dataset.tab === name)));
+  window.scrollTo(0, 0);
+  if (name === "shelf") { renderShelf(true); lastFinished = null; }
+  if (name === "backup") renderBackup();
+}
+function renderAll() { renderList(); renderShelf(); renderBackup(); }
+
+document.addEventListener("click", ev => {
+  const t = ev.target;
+  const open = t.closest("[data-open]");
+  if (open) { openSheet(+open.dataset.open); return; }
+  const tab = t.closest("[data-tab]");
+  if (tab) { showTab(tab.dataset.tab); return; }
+  const go = t.closest("[data-goto]");
+  if (go) { showTab(go.dataset.goto); return; }
+  const f = t.closest("[data-filter]");
+  if (f) {
+    filter = f.dataset.filter;
+    document.querySelectorAll("[data-filter]").forEach(b => {
+      const on = b === f;
+      b.classList.toggle("on", on);
+      b.setAttribute("aria-pressed", String(on));
+    });
+    renderList();
+    return;
+  }
+  if (t.closest("[data-close]")) { closeSheet(); return; }
+});
+
+$("#sheetBody").addEventListener("click", ev => {
+  const st = ev.target.closest("[data-status]");
+  if (st) { changeStatus(currentRank, st.dataset.status); return; }
+  const star = ev.target.closest("[data-star]");
+  if (star) {
+    const n = +star.dataset.star;
+    setEntry(currentRank, { rating: entry(currentRank).rating === n ? 0 : n });
+    renderSheet();
+  }
+});
+$("#sheetBody").addEventListener("input", ev => {
+  if (ev.target.id === "notes") setEntry(currentRank, { notes: ev.target.value });
+});
+document.addEventListener("keydown", ev => { if (ev.key === "Escape") closeSheet(); });
+
+$("#search").addEventListener("input", ev => { query = ev.target.value.trim(); renderList(); });
+$("#exportBtn").addEventListener("click", exportBackup);
+$("#importBtn").addEventListener("click", () => $("#importFile").click());
+$("#importFile").addEventListener("change", ev => {
+  const file = ev.target.files && ev.target.files[0];
+  ev.target.value = "";
+  if (file) importBackup(file);
+});
+$("#resetBtn").addEventListener("click", () => {
+  if (!hasData()) { toast("Es gibt noch keine Einträge"); return; }
+  if (!confirm("Wirklich alle Einträge löschen? Das lässt sich nur mit einem Backup rückgängig machen.")) return;
+  state.books = {};
+  save();
+  renderAll();
+  toast("Alle Einträge gelöscht");
+});
+window.addEventListener("online", () => {
+  Object.keys(failedAt).forEach(k => delete failedAt[k]);
+  hydrateCovers(document);
+});
+
+/* ---------- Start ---------- */
+renderAll();
+requestPersist().then(renderBackup);
+if ("serviceWorker" in navigator && location.protocol === "https:") {
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+}
+})();
+</script>
+</body>
+</html>
